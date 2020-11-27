@@ -150,7 +150,7 @@ var file_chat_proto_rawDesc = []byte{
 	0x12, 0x16, 0x0a, 0x06, 0x69, 0x6e, 0x64, 0x69, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03,
 	0x52, 0x06, 0x69, 0x6e, 0x64, 0x69, 0x63, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x6e, 0x6f, 0x6d, 0x62,
 	0x72, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6e, 0x6f, 0x6d, 0x62, 0x72, 0x65,
-	0x32, 0x93, 0x01, 0x0a, 0x0b, 0x43, 0x68, 0x61, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
+	0x32, 0xc4, 0x01, 0x0a, 0x0b, 0x43, 0x68, 0x61, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
 	0x12, 0x2a, 0x0a, 0x08, 0x53, 0x61, 0x79, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x12, 0x0d, 0x2e, 0x63,
 	0x68, 0x61, 0x74, 0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x1a, 0x0d, 0x2e, 0x63, 0x68,
 	0x61, 0x74, 0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x00, 0x12, 0x2b, 0x0a, 0x09,
@@ -159,7 +159,10 @@ var file_chat_proto_rawDesc = []byte{
 	0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x00, 0x28, 0x01, 0x12, 0x2b, 0x0a, 0x09, 0x4c, 0x69, 0x62,
 	0x72, 0x6f, 0x73, 0x44, 0x69, 0x73, 0x12, 0x0d, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x4d, 0x65,
 	0x73, 0x73, 0x61, 0x67, 0x65, 0x1a, 0x0d, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x4d, 0x65, 0x73,
-	0x73, 0x61, 0x67, 0x65, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x73, 0x61, 0x67, 0x65, 0x22, 0x00, 0x12, 0x2f, 0x0a, 0x0d, 0x53, 0x65, 0x6e, 0x64, 0x50, 0x72,
+	0x6f, 0x70, 0x75, 0x65, 0x73, 0x74, 0x61, 0x12, 0x0d, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x4d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x1a, 0x0d, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x4d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -183,11 +186,13 @@ var file_chat_proto_depIdxs = []int32{
 	0, // 0: chat.ChatService.SayHello:input_type -> chat.Message
 	1, // 1: chat.ChatService.SendChunk:input_type -> chat.Chunk
 	0, // 2: chat.ChatService.LibrosDis:input_type -> chat.Message
-	0, // 3: chat.ChatService.SayHello:output_type -> chat.Message
-	0, // 4: chat.ChatService.SendChunk:output_type -> chat.Message
-	0, // 5: chat.ChatService.LibrosDis:output_type -> chat.Message
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	0, // 3: chat.ChatService.SendPropuesta:input_type -> chat.Message
+	0, // 4: chat.ChatService.SayHello:output_type -> chat.Message
+	0, // 5: chat.ChatService.SendChunk:output_type -> chat.Message
+	0, // 6: chat.ChatService.LibrosDis:output_type -> chat.Message
+	0, // 7: chat.ChatService.SendPropuesta:output_type -> chat.Message
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -259,6 +264,7 @@ type ChatServiceClient interface {
 	SayHello(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
 	SendChunk(ctx context.Context, opts ...grpc.CallOption) (ChatService_SendChunkClient, error)
 	LibrosDis(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
+	SendPropuesta(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
 }
 
 type chatServiceClient struct {
@@ -321,11 +327,21 @@ func (c *chatServiceClient) LibrosDis(ctx context.Context, in *Message, opts ...
 	return out, nil
 }
 
+func (c *chatServiceClient) SendPropuesta(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error) {
+	out := new(Message)
+	err := c.cc.Invoke(ctx, "/chat.ChatService/SendPropuesta", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatServiceServer is the server API for ChatService service.
 type ChatServiceServer interface {
 	SayHello(context.Context, *Message) (*Message, error)
 	SendChunk(ChatService_SendChunkServer) error
 	LibrosDis(context.Context, *Message) (*Message, error)
+	SendPropuesta(context.Context, *Message) (*Message, error)
 }
 
 // UnimplementedChatServiceServer can be embedded to have forward compatible implementations.
@@ -340,6 +356,9 @@ func (*UnimplementedChatServiceServer) SendChunk(ChatService_SendChunkServer) er
 }
 func (*UnimplementedChatServiceServer) LibrosDis(context.Context, *Message) (*Message, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LibrosDis not implemented")
+}
+func (*UnimplementedChatServiceServer) SendPropuesta(context.Context, *Message) (*Message, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendPropuesta not implemented")
 }
 
 func RegisterChatServiceServer(s *grpc.Server, srv ChatServiceServer) {
@@ -408,6 +427,24 @@ func _ChatService_LibrosDis_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChatService_SendPropuesta_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Message)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).SendPropuesta(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chat.ChatService/SendPropuesta",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).SendPropuesta(ctx, req.(*Message))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ChatService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "chat.ChatService",
 	HandlerType: (*ChatServiceServer)(nil),
@@ -419,6 +456,10 @@ var _ChatService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LibrosDis",
 			Handler:    _ChatService_LibrosDis_Handler,
+		},
+		{
+			MethodName: "SendPropuesta",
+			Handler:    _ChatService_SendPropuesta_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

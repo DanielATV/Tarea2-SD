@@ -15,6 +15,8 @@ service ChatService {
   rpc SayHello(Message) returns (Message) {}
   rpc SendChunk(stream Chunk) returns (Message){}
   rpc LibrosDis(Message) returns (Message) {}
+  rpc SendPropuesta(Message) returns (Message) {}
+  
   
 
 }
