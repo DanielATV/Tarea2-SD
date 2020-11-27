@@ -3,6 +3,7 @@ package chat
 import (
 	"log"
 	"io"
+	"fmt"
 	"golang.org/x/net/context"
 )
 
@@ -46,6 +47,9 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 }
 
 func (s *Server) LibrosDis(ctx context.Context, in *Message) (*Message, error) {
-	log.Printf("Receive message body from client: %s", in.Body)
+	
+	for index, value := range s.Libros {
+		fmt.Println(index, value)
+	}
 	return &Message{Body: "Hello From the Server!"}, nil
 }

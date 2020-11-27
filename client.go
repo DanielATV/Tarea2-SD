@@ -81,6 +81,7 @@ func main() {
 	// ClientDownloader
 	} else{
 
+		
 		var conn *grpc.ClientConn
 		conn, err := grpc.Dial(":9000", grpc.WithInsecure())
 		if err != nil {
@@ -88,7 +89,15 @@ func main() {
 		}
 		defer conn.Close()
 
-		//c := chat.NewChatServiceClient(conn)
+
+
+		c := chat.NewChatServiceClient(conn)
+
+		response, err := c.LibrosDis(context.Background(), &chat.Message{Body: "OK"})
+		if err != nil {
+			log.Fatalf("Error when calling SayHello: %s", err)
+		}
+		log.Printf("Response from server: %s", response.Body)
 	}
 
 	
