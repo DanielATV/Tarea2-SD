@@ -8,7 +8,8 @@ import (
 	"fmt"
          
     "math"
-    "os"
+	"os"
+	"strings"
 
 	"github.com/tutorialedge/go-grpc-beginners-tutorial/chat"
 )
@@ -98,6 +99,15 @@ func main() {
 			log.Fatalf("Error when calling SayHello: %s", err)
 		}
 		log.Printf("Response from server: %s", response.Body)
+
+		var sep []string
+		sep = strings.Split(response.Body,"%%%")
+		for index, value := range sep {
+			fmt.Println(index, value)
+	
+		}
+
+
 	}
 
 	

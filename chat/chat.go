@@ -48,8 +48,20 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 func (s *Server) LibrosDis(ctx context.Context, in *Message) (*Message, error) {
 	
+	var actual string
+	flag:= 0
+
 	for index, value := range s.Libros {
 		fmt.Println(index, value)
+
+		if flag == 0{
+			actual = value
+			flag= 1
+		} else{
+			actual = actual + "%%%" + value
+
+		}
+
 	}
-	return &Message{Body: "Hello From the Server!"}, nil
+	return &Message{Body: actual}, nil
 }
