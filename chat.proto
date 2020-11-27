@@ -8,10 +8,14 @@ message Message {
 message Chunk {
   bytes chunk = 1;
   int64 indice = 2;
+  string nombre =3;
 }
 
 service ChatService {
   rpc SayHello(Message) returns (Message) {}
   rpc SendChunk(stream Chunk) returns (Message){}
+  rpc LibrosDis(Message) returns (Message) {}
+  
+
 }
 

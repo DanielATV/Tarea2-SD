@@ -7,6 +7,8 @@ import (
 )
 
 type Server struct {
+	Log map [string]string
+	Libros []string
 }
 
 func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
@@ -15,23 +17,35 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 }
 
 func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
-	for {
-		_, err = stream.Recv()
-		if err != nil {
-			if err == io.EOF {
-				goto END
-			}
 
-			
-			return nil
+	var libro string
+	var buffer *Chunk
+	flag:= 0
+	for {
+		buffer, err = stream.Recv()
+		if err == io.EOF {
+			log.Printf("LLego el libro %s", s.Libros[0])
+			return stream.SendAndClose(&Message{Body: "Termino transferencia"})
 		}
+		if err != nil {
+			return err
+		}
+
+		if flag ==0 {
+			libro = buffer.Nombre
+			s.Libros = append(s.Libros,libro)
+			flag = 1
+		}
+		
 	}
 
-END:
-        // once the transmission finished, send the
-        // confirmation if nothign went wrong
-	err = stream.SendAndClose(&Message{Body: "Termino transferencia"})
+	
 	
 
-	return
+
+}
+
+func (s *Server) LibrosDis(ctx context.Context, in *Message) (*Message, error) {
+	log.Printf("Receive message body from client: %s", in.Body)
+	return &Message{Body: "Hello From the Server!"}, nil
 }
