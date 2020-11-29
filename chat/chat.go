@@ -6,6 +6,12 @@ import (
 	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	//"bufio"
+	
+	"io/ioutil"
+	//"math"
+	"os"
+	"strconv"
 )
 
 type Server struct {
@@ -19,10 +25,16 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 }
 func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, error) {
 	log.Printf("Receive message body from client: %s", in.Body)
-	return &Message{Body: "Hello From the Server!"}, nil
+	//logica centralizada
+	//guardar en el log (otro metodo)
+	//logica distribuida
+	return &Message{Body: "Propuesta OK"}, nil
 }
+
 func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
+
+	var chunkList [][]byte
 	var libro string
 	var buffer *Chunk
 	flag:= 0
@@ -40,13 +52,18 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			libro = buffer.Nombre
 			s.Libros = append(s.Libros,libro)
 			flag = 1
+			chunkList = append(chunkList,buffer.Chunk)
 		}
+
+		chunkList = append(chunkList,buffer.Chunk)
 		
 	}
 
 	//Envia propuesta
+
+	//logica centralizada
 	var conn *grpc.ClientConn
-	conn, error := grpc.Dial(":9000", grpc.WithInsecure())
+	conn, error := grpc.Dial(":9001", grpc.WithInsecure())
 	if error != nil {
 		log.Fatalf("did not connect: %s", err)
 	}
@@ -58,6 +75,29 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 		log.Fatalf("Error when calling SayHello: %s", err)
 	}
 	log.Printf("Response from server: %s", response.Body)
+
+
+	//Distribuir los chunks
+	for i := 0; i < len(chunkList); i++ {
+
+	
+		// write to disk
+		fileName := "bigfile_" + strconv.FormatUint(uint64(i), 10)
+		_, err := os.Create(fileName)
+
+		if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+		}
+
+		// write/save buffer to disk
+		ioutil.WriteFile(fileName, chunkList[i], os.ModeAppend)
+
+		fmt.Println("Split to : ", fileName)
+	}
+
+	
+
 
 	return stream.SendAndClose(&Message{Body: "Termino transferencia"})
 	
