@@ -5,6 +5,11 @@ message Message {
   string body = 1;
 }
 
+message LogIfno{
+  string log =1;
+  int64 partes=2;
+}
+
 message Chunk {
   bytes chunk = 1;
   int64 indice = 2;
@@ -16,6 +21,8 @@ service ChatService {
   rpc SendChunk(stream Chunk) returns (Message){}
   rpc LibrosDis(Message) returns (Message) {}
   rpc SendPropuesta(Message) returns (Message) {}
+  //rpc RequestLog(Message) returns (Message) {}
+  rpc RequestChunk(Message) returns (Chunk) {}
   
   
 

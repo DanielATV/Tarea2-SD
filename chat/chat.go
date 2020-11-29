@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	//"bufio"
+	"bufio"
 	
 	"io/ioutil"
 	//"math"
@@ -126,3 +126,39 @@ func (s *Server) LibrosDis(ctx context.Context, in *Message) (*Message, error) {
 	return &Message{Body: actual}, nil
 }
 
+func (s *Server) RequestChunk(ctx context.Context, in *Message) (*Chunk, error) {
+	log.Printf("Receive message body from client: %s", in.Body)
+	//read a chunk
+	currentChunkFileName := in.Body
+	newFileChunk, err := os.Open(currentChunkFileName)
+
+	if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+	}
+
+	defer newFileChunk.Close()
+
+	chunkInfo, err4 := newFileChunk.Stat()
+
+	if err4 != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	// calculate the bytes size of each chunk
+	// we are not going to rely on previous data and constant
+
+	var chunkSize int64 = chunkInfo.Size()
+	chunkBufferBytes := make([]byte, chunkSize)
+
+	// read into chunkBufferBytes
+	reader := bufio.NewReader(newFileChunk)
+	_, err = reader.Read(chunkBufferBytes)
+
+	if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+	}
+
+	return &Chunk{Chunk: chunkBufferBytes}, nil
+}

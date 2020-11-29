@@ -9,7 +9,7 @@ import (
          
     "math"
 	"os"
-	"strings"
+	//"strings"
 
 	"github.com/tutorialedge/go-grpc-beginners-tutorial/chat"
 )
@@ -83,6 +83,11 @@ func main() {
 	} else{
 
 		
+
+
+		//Libros disponibles
+
+		/*
 		var conn *grpc.ClientConn
 		conn, err := grpc.Dial(":9001", grpc.WithInsecure())
 		if err != nil {
@@ -106,6 +111,76 @@ func main() {
 			fmt.Println(index, value)
 	
 		}
+		*/
+		//Consulta el log
+
+		books := [9]string{"bigfile_0", "bigfile_1", "bigfile_2","bigfile_3", "bigfile_4", "bigfile_5",
+		"bigfile_6","bigfile_7","bigfile_8"}
+
+		//Descarga del datanode
+		//var conn *grpc.ClientConn
+		conn, err6 := grpc.Dial(":9000", grpc.WithInsecure())
+		if err6 != nil {
+			log.Fatalf("did not connect: %s", err6)
+		}
+		defer conn.Close()
+
+		cc := chat.NewChatServiceClient(conn)
+
+
+		newFileName := "libro.pdf"
+        _, err := os.Create(newFileName)
+
+        if err != nil {
+                fmt.Println(err)
+                os.Exit(1)
+        }
+
+        //set the newFileName file to APPEND MODE!!
+        // open files r and w
+
+        file, err := os.OpenFile(newFileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+
+        if err != nil {
+                fmt.Println(err)
+                os.Exit(1)
+        }
+
+		for j := 0; j < len(books); j++ {
+
+            
+			responseChunk, err := cc.RequestChunk(context.Background(), &chat.Message{Body: books[j]})
+			if err != nil {
+				log.Fatalf("Error when calling SayHello: %s", err)
+			}
+			
+
+			// DON't USE ioutil.WriteFile -- it will overwrite the previous bytes!
+			// write/save buffer to disk
+			//ioutil.WriteFile(newFileName, chunkBufferBytes, os.ModeAppend)
+
+			n, err := file.Write(responseChunk.Chunk)
+
+			if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+			}
+
+			file.Sync() //flush to disk
+
+			// free up the buffer for next cycle
+			// should not be a problem if the chunk size is small, but
+			// can be resource hogging if the chunk size is huge.
+			// also a good practice to clean up your own plate after eating
+
+			fmt.Println("Written ", n, " bytes")
+
+			fmt.Println("Recombining part [", j, "] into : ", newFileName)
+		}
+
+		// now, we close the newFileName
+		file.Close()
+
 
 
 	}
