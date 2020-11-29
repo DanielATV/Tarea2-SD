@@ -19,10 +19,18 @@ func main() {
 	var clientType int
 	clientType = 0
 
+	//Solicitar tipo de cliente
+	fmt.Println("Indique el tipo de cliente")
+	fmt.Println("0: Uploader")
+	fmt.Println("1: Downloader")
+	
+	fmt.Scanln(&clientType)
+
 
 	// ClientUploader
 	if clientType == 0{
 
+		//Conexion a DataNode
 		var conn *grpc.ClientConn
 		conn, err := grpc.Dial(":9000", grpc.WithInsecure())
 		if err != nil {
@@ -34,7 +42,7 @@ func main() {
 
 		var chunkList [][]byte
 
-
+		//Particion del Libro
 		fileToBeChunked := "./libros/Dracula-Stoker_Bram.pdf" // change here!
 
 		file, err := os.Open(fileToBeChunked)
@@ -60,6 +68,8 @@ func main() {
 
 		stream, _ := c.SendChunk(context.Background())
 
+
+		// Envio de chunks
 		for i := uint64(0); i < totalPartsNum; i++ {
 
 				partSize := int(math.Min(fileChunk, float64(fileSize-int64(i*fileChunk))))
@@ -85,8 +95,9 @@ func main() {
 		
 
 
-		//Libros disponibles
+		//Consulta Libros disponibles
 
+		//Conexion al NameNode
 		/*
 		var conn *grpc.ClientConn
 		conn, err := grpc.Dial(":9001", grpc.WithInsecure())
@@ -96,7 +107,7 @@ func main() {
 		defer conn.Close()
 
 
-
+		
 		c := chat.NewChatServiceClient(conn)
 
 		response, err := c.LibrosDis(context.Background(), &chat.Message{Body: "OK"})

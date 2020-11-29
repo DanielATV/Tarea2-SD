@@ -23,6 +23,7 @@ service ChatService {
   rpc SendPropuesta(Message) returns (Message) {}
   //rpc RequestLog(Message) returns (Message) {}
   rpc RequestChunk(Message) returns (Chunk) {}
+  //rpc CheckStatus(Message) returns (Message) {}
   
   
 
