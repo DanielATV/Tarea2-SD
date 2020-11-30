@@ -122,7 +122,7 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 	if s.Mode == 0{
 		//logica centralizada
 
-		prop= "1%%%1%%%1%%%1%%%1%%%1%%%1%%%1%%%1"
+		prop= "1%%%1%%%1%%%1%%%1%%%1%%%1%%%1"
 
 		//checkear propuesta
 
@@ -142,6 +142,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 	var chunkList [][]byte
 	var libro string
 	var buffer *Chunk
+	var cantidadMensajes int
 	flag:= 0
 	for {
 		buffer, err = stream.Recv()
@@ -158,9 +159,11 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			s.Libros = append(s.Libros,libro)
 			flag = 1
 			chunkList = append(chunkList,buffer.Chunk)
+			cantidadMensajes = int(buffer.Total)
 		}
 
 		chunkList = append(chunkList,buffer.Chunk)
+		buffer.Chunk = nil
 		
 	}
 
@@ -182,7 +185,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 		c := NewChatServiceClient(conn)
 
 		//crear propuesta
-		response, err1 := c.SendPropuesta(context.Background(), &Message{Body: "1%%%2%%%3%%%1%%%2%%%3%%%1%%%2%%%3",
+		response, err1 := c.SendPropuesta(context.Background(), &Message{Body: "1%%%2%%%3%%%1%%%2%%%3%%%1%%%2",
 		Id: s.Id})
 		if err1 != nil {
 			log.Fatalf("Error when calling SayHello: %s", err1)
@@ -193,7 +196,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 		//Escribir en el log
 		response, err2 := c.WriteLog(context.Background(), &LogInfo{Log: distribution, Nombre: libro,
-		Partes: int64(len(chunkList))})
+		Partes: int64(cantidadMensajes)})
 		if err2 != nil {
 			log.Fatalf("Error when calling SayHello: %s", err2)
 		}
@@ -210,8 +213,18 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 	var sep []string
 	cont:= 0
+	//fmt.Println(len(chunkList))
 	sep = strings.Split(distribution,"%%%")
-	for i := 0; i < len(chunkList); i++ {
+	for i := 0; i < cantidadMensajes; i++ {
+
+		/*
+		fmt.Println(cont)
+		if cont >= cantidadMensajes{
+			fmt.Println("Entre al break")
+			break
+		
+		}
+		*/
 
 		if sep[cont] == s.Id{
 
@@ -228,6 +241,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			ioutil.WriteFile(fileName, chunkList[i], os.ModeAppend)
 
 			fmt.Println("Split to : ", fileName)
+			
 
 		} else {
 			if sep[cont] == "1"{
