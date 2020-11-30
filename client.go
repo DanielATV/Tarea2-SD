@@ -79,7 +79,7 @@ func main() {
 
 				chunkList = append(chunkList,partBuffer)
 
-				stream.Send(&chat.Chunk{Chunk: partBuffer, Nombre: "Dracula-Stoker_Bram.pdf"})
+				stream.Send(&chat.Chunk{Chunk: partBuffer, Nombre: "Dracula-Stoker_Bram.pdf", Total: int64(totalPartsNum)})
 		}
 
 		response, err := stream.CloseAndRecv()
@@ -165,12 +165,13 @@ func main() {
 				log.Fatalf("Error when calling SayHello: %s", err)
 			}
 			
+			chunkBufferBytes := responseChunk.Chunk
 
 			// DON't USE ioutil.WriteFile -- it will overwrite the previous bytes!
 			// write/save buffer to disk
 			//ioutil.WriteFile(newFileName, chunkBufferBytes, os.ModeAppend)
 
-			n, err := file.Write(responseChunk.Chunk)
+			n, err := file.Write(chunkBufferBytes)
 
 			if err != nil {
 					fmt.Println(err)
@@ -178,6 +179,8 @@ func main() {
 			}
 
 			file.Sync() //flush to disk
+
+			chunkBufferBytes = nil // reset or empty our buffer
 
 			// free up the buffer for next cycle
 			// should not be a problem if the chunk size is small, but

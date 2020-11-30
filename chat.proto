@@ -3,17 +3,20 @@ package chat;
 
 message Message {
   string body = 1;
+  string id = 2;
 }
 
-message LogIfno{
+message LogInfo{
   string log =1;
   int64 partes=2;
+  string nombre = 3;
 }
 
 message Chunk {
   bytes chunk = 1;
   int64 indice = 2;
   string nombre =3;
+  int64 total = 4;
 }
 
 service ChatService {
@@ -24,6 +27,8 @@ service ChatService {
   //rpc RequestLog(Message) returns (Message) {}
   rpc RequestChunk(Message) returns (Chunk) {}
   //rpc CheckStatus(Message) returns (Message) {}
+  rpc WriteLog(LogInfo) returns (Message) {}
+  rpc DistributeChunk(Chunk) returns (Message) {}
   
   
 
