@@ -162,6 +162,8 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			cantidadMensajes = int(buffer.Total)
 		}
 
+		//El largo de la lista esta mal
+		//imprimir los indices
 		chunkList = append(chunkList,buffer.Chunk)
 		buffer.Chunk = nil
 		
