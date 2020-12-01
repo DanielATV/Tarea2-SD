@@ -145,6 +145,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 	var cantidadMensajes int
 	flag:= 0
 	for {
+		//fmt.Println(len(chunkList))
 		buffer, err = stream.Recv()
 		if err == io.EOF {
 			log.Printf("LLego el libro %s", s.Libros[0])
@@ -160,14 +161,18 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			flag = 1
 			chunkList = append(chunkList,buffer.Chunk)
 			cantidadMensajes = int(buffer.Total)
+			continue
 		}
 
 		//El largo de la lista esta mal
 		//imprimir los indices
 		chunkList = append(chunkList,buffer.Chunk)
+		//fmt.Println(buffer.Indice)
 		buffer.Chunk = nil
 		
 	}
+
+	//fmt.Println(len(chunkList))
 
 	//Envia propuesta
 

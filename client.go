@@ -79,7 +79,8 @@ func main() {
 
 				chunkList = append(chunkList,partBuffer)
 
-				stream.Send(&chat.Chunk{Chunk: partBuffer, Nombre: "Dracula-Stoker_Bram.pdf", Total: int64(totalPartsNum)})
+				stream.Send(&chat.Chunk{Chunk: partBuffer, Nombre: "Dracula-Stoker_Bram.pdf", Total: int64(totalPartsNum),
+			Indice: int64(i)})
 		}
 
 		response, err := stream.CloseAndRecv()
