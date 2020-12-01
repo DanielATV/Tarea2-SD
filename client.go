@@ -37,7 +37,7 @@ func main() {
 			log.Fatalf("did not connect: %s", err)
 		}
 		defer conn.Close()
-
+		
 		c := chat.NewChatServiceClient(conn)
 
 		var chunkList [][]byte

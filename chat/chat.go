@@ -26,6 +26,80 @@ type Server struct {
 	mux sync.Mutex
 	State int
 }
+type mensaje struct{
+	nombre string
+	largo_chunks int
+}
+
+func createProp (ej1 mensaje,posibles []string) string{ //Funcion que crea una propuesta
+	var prop_c string
+	var prob int
+	s1 := rand.NewSource(time.Now().UnixNano())
+    r1 := rand.New(s1)
+    var cont int = 0
+
+	if ej1.largo_chunks>=3{
+
+
+		prop_c = prop_c+posibles[0]
+		cont = cont + 1 
+
+		if len(posibles)>1{
+			prop_c = prop_c+posibles[1]
+			cont = cont +1
+		}
+		if len(posibles)>2{
+			prop_c = prop_c+posibles[2]
+			cont = cont + 1
+		}
+		for i:=cont + 1; i<= ej1.largo_chunks; i++{
+			prob = r1.Intn(len(posibles))
+			prop_c = prop_c+posibles[prob]
+		}
+	} else if ej1.largo_chunks == 2{
+
+		prop_c = prop_c+posibles[0]
+
+		if ( len(posibles)>1){
+			prop_c = prop_c+posibles[1]
+		}else{
+			prop_c = prop_c+posibles[0]
+		}
+		
+	}else{
+		prop_c = prop_c+posibles[0]
+	}
+
+	prop_c = prop_c[0:len(prop_c)-3]
+	return prop_c
+}
+
+func createRegProp (ej1 mensaje, m1 bool, m2 bool, m3 bool) string{ //Funcion que crea una propuesta dependiendo de sus restricciones
+	var prop_c string
+	var posibles []string
+
+	if (m1 && m2){
+		posibles = []string {"1%%%","2%%%"}
+		prop_c = createProp(ej1,posibles)
+	} else if(m1 && m3){
+		posibles = []string{"1%%%","3%%%"}
+		prop_c = createProp(ej1,posibles)
+	} else if(m2 && m3){
+		posibles = []string{"2%%%","3%%%"}
+		prop_c = createProp(ej1,posibles)
+	} else if(m1){
+		posibles = []string{"1%%%"}
+		prop_c = createProp(ej1,posibles)
+	}else if(m2){
+		posibles = []string{"2%%%"}
+		prop_c = createProp(ej1,posibles)
+	}else if(m3){
+		posibles = []string{"3%%%"}
+		prop_c = createProp(ej1,posibles)
+	}
+	return prop_c
+
+}
 
 func escribir(libro string, partes int, lis []string ){
 	//fmt.Println(libro,partes,lis)
@@ -118,14 +192,76 @@ func (s *Server) CheckStatus(ctx context.Context, in *Message) (*Message, error)
 }
 func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, error) {
 	log.Printf("Propuesta recibida: %s", in.Body)
-	var prop string
+	var prop_c string
 
 	if s.Mode == 0{
 		//logica centralizada
+		
 
-		prop= "1%%%1%%%1%%%1%%%1%%%1%%%1%%%1"
+		m1 := true
+		m2 := true
+		m3 := true
+
+		var sep []string
+		sep = strings.Split(in.Body,"%%%")
+
+		//checkear conexiones
+
+	
+
+		//DataNode 1
+		var conn *grpc.ClientConn
+		conn, err := grpc.Dial(":9000", grpc.WithInsecure())
+		if err != nil {
+			log.Fatalf("did not connect: %s", err)
+		}
+
+		c := NewChatServiceClient(conn)
+
+		_, err1 := c.SayHello(context.Background(), &Message{Body: "Hello From Client!"})
+		if err1 != nil {
+			m1 = false
+		}
+		
+		conn.Close()
+		
+		//DataNode 2
+		conn2, err2 := grpc.Dial(":9002", grpc.WithInsecure())
+		if err2 != nil {
+			log.Fatalf("did not connect: %s", err)
+		}
+
+		c = NewChatServiceClient(conn)
+		_, err22 := c.SayHello(context.Background(), &Message{Body: "Hello From Client!"})
+		if err22 != nil {
+			m2 = false
+		}
+	
+		conn2.Close()
+
+		//DataNode 3
+		conn3, err3 := grpc.Dial(":9003", grpc.WithInsecure())
+		if err3 != nil {
+			log.Fatalf("did not connect: %s", err)
+		}
+
+		c = NewChatServiceClient(conn)
+		_, err33 := c.SayHello(context.Background(), &Message{Body: "Hello From Client!"})
+		if err33 != nil {
+			m3 = false
+		}
+		conn3.Close()
+
+
+		ej1 := mensaje{nombre : "N/A", largo_chunks :len(sep) }
 
 		//checkear propuesta
+		if (m1 && m2 && m3){
+			// seguir propuesta enviada por el data node
+			prop_c = in.Body
+		}else{
+			prop_c = createRegProp(ej1,m1,m2,m3)
+		}
 
 	} else{
 		//logica distribuida
@@ -134,7 +270,7 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 	
 	//guardar en el log (otro metodo)
 	
-	return &Message{Body: prop}, nil
+	return &Message{Body: prop_c}, nil
 }
 
 func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
