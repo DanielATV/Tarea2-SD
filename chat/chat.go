@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"math/rand"
 )
 
 type Server struct {
@@ -164,8 +165,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			continue
 		}
 
-		//El largo de la lista esta mal
-		//imprimir los indices
+	
 		chunkList = append(chunkList,buffer.Chunk)
 		//fmt.Println(buffer.Indice)
 		buffer.Chunk = nil
@@ -192,7 +192,33 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 		c := NewChatServiceClient(conn)
 
 		//crear propuesta
-		response, err1 := c.SendPropuesta(context.Background(), &Message{Body: "1%%%2%%%3%%%1%%%2%%%3%%%1%%%2",
+		var prop_c string
+		var prob int
+		s1 := rand.NewSource(time.Now().UnixNano())
+		r1 := rand.New(s1)
+		
+		var aux string
+
+		if len(chunkList)>=3{
+			prop_c = prop_c + "1%%%"
+			prop_c = prop_c + "2%%%"
+			prop_c = prop_c + "3%%%"
+			for i:=4; i<= len(chunkList); i++{
+				prob = r1.Intn(3) +1
+				aux = strconv.Itoa(prob)
+				prop_c = prop_c + aux + "%%%"
+			}
+		} else if len(chunkList) == 2{
+			prop_c = prop_c + "1%%%"
+			prop_c = prop_c + "2%%%"
+		}else{
+			prop_c = prop_c + "1%%%"
+		}
+	
+		prop_c = prop_c[0:len(prop_c)-3]
+
+
+		response, err1 := c.SendPropuesta(context.Background(), &Message{Body: prop_c,
 		Id: s.Id})
 		if err1 != nil {
 			log.Fatalf("Error when calling SayHello: %s", err1)
