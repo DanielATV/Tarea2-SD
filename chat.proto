@@ -24,9 +24,9 @@ service ChatService {
   rpc SendChunk(stream Chunk) returns (Message){}
   rpc LibrosDis(Message) returns (Message) {}
   rpc SendPropuesta(Message) returns (Message) {}
-  //rpc RequestLog(Message) returns (Message) {}
+  rpc RequestLog(Message) returns (Message) {}
   rpc RequestChunk(Message) returns (Chunk) {}
-  //rpc CheckStatus(Message) returns (Message) {}
+  rpc CheckStatus(Message) returns (Message) {}
   rpc WriteLog(LogInfo) returns (Message) {}
   rpc DistributeChunk(Chunk) returns (Message) {}
   

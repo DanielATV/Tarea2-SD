@@ -9,7 +9,7 @@ import (
          
     "math"
 	"os"
-	//"strings"
+	"strings"
 
 	"github.com/tutorialedge/go-grpc-beginners-tutorial/chat"
 )
@@ -99,14 +99,13 @@ func main() {
 		//Consulta Libros disponibles
 
 		//Conexion al NameNode
-		/*
+		
 		var conn *grpc.ClientConn
 		conn, err := grpc.Dial(":9001", grpc.WithInsecure())
 		if err != nil {
 			log.Fatalf("did not connect: %s", err)
 		}
 		defer conn.Close()
-
 
 		
 		c := chat.NewChatServiceClient(conn)
@@ -123,27 +122,21 @@ func main() {
 			fmt.Println(index, value)
 	
 		}
-		*/
+
 		//Consulta el log
-
-		books := [9]string{"bigfile_0", "bigfile_1", "bigfile_2","bigfile_3", "bigfile_4", "bigfile_5",
-		"bigfile_6","bigfile_7","bigfile_8"}
-
-		//Descarga del datanode
-		//var conn *grpc.ClientConn
-		conn, err6 := grpc.Dial(":9000", grpc.WithInsecure())
-		if err6 != nil {
-			log.Fatalf("did not connect: %s", err6)
+		source, err := c.RequestLog(context.Background(), &chat.Message{Body: "Dracula-Stoker_Bram.pdf"})
+		if err != nil {
+			log.Fatalf("Error when calling SayHello: %s", err)
 		}
-		defer conn.Close()
+		log.Printf("Response from server: %s", response.Body)
 
-		cc := chat.NewChatServiceClient(conn)
-
+		holder := strings.Split(source.Body,"%%%")
+		var bufferAux []string
 
 		newFileName := "libro.pdf"
-        _, err := os.Create(newFileName)
+        _, err9 := os.Create(newFileName)
 
-        if err != nil {
+        if err9 != nil {
                 fmt.Println(err)
                 os.Exit(1)
         }
@@ -158,10 +151,37 @@ func main() {
                 os.Exit(1)
         }
 
-		for j := 0; j < len(books); j++ {
 
-            
-			responseChunk, err := cc.RequestChunk(context.Background(), &chat.Message{Body: books[j]})
+		var hostname string
+
+		for _ , valor := range holder{
+			bufferAux = strings.Split(valor,"&&&")
+
+			if bufferAux[1] == "1"{
+				hostname = ":9000"
+
+			}
+
+			if bufferAux[1] == "2"{
+				hostname = ":9002"
+
+			} else{
+				hostname = ":9003"
+
+				
+			}
+
+			//Descarga del datanode
+			var conn *grpc.ClientConn
+			conn, err6 := grpc.Dial(hostname, grpc.WithInsecure())
+			if err6 != nil {
+				log.Fatalf("did not connect: %s", err6)
+			}
+			defer conn.Close()
+
+			cc := chat.NewChatServiceClient(conn)
+
+			responseChunk, err := cc.RequestChunk(context.Background(), &chat.Message{Body: bufferAux[0]})
 			if err != nil {
 				log.Fatalf("Error when calling SayHello: %s", err)
 			}
@@ -190,11 +210,20 @@ func main() {
 
 			fmt.Println("Written ", n, " bytes")
 
-			fmt.Println("Recombining part [", j, "] into : ", newFileName)
+			
+
 		}
 
 		// now, we close the newFileName
 		file.Close()
+
+
+		
+
+
+		
+
+		
 
 
 

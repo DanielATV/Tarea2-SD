@@ -31,6 +31,38 @@ type mensaje struct{
 	largo_chunks int
 }
 
+func createRegPropDist (ej1 mensaje, m1 bool, m2 bool, m3 bool) string{ //Funcion que crea una propuesta dependiendo de sus restricciones
+	var prop_c string
+	var posibles []string
+
+	if (m1 && m2 && m3){
+		posibles = []string {"1%%%","2%%%","3%%%"}
+		prop_c = createProp(ej1,posibles)
+	} else if(m1 && m2){
+		posibles = []string {"1%%%","2%%%"}
+		prop_c = createProp(ej1,posibles)
+	} else if(m1 && m3){
+		posibles = []string{"1%%%","3%%%"}
+		prop_c = createProp(ej1,posibles)
+	} else if(m2 && m3){
+		posibles = []string{"2%%%","3%%%"}
+		prop_c = createProp(ej1,posibles)
+	} else if(m1){
+		posibles = []string{"1%%%"}
+		prop_c = createProp(ej1,posibles)
+	}else if(m2){
+		posibles = []string{"2%%%"}
+		prop_c = createProp(ej1,posibles)
+	}else if(m3){
+		posibles = []string{"3%%%"}
+		prop_c = createProp(ej1,posibles)
+	}else if(m1 && m2 && m3){
+		posibles = []string {"1%%%","2%%%","3%%%"}
+	}
+	return prop_c
+
+}
+
 func createProp (ej1 mensaje,posibles []string) string{ //Funcion que crea una propuesta
 	var prop_c string
 	var prob int
@@ -101,8 +133,10 @@ func createRegProp (ej1 mensaje, m1 bool, m2 bool, m3 bool) string{ //Funcion qu
 
 }
 
-func escribir(libro string, partes int, lis []string ){
+func escribir(libro string, partes int, lis []string ) string{
 	//fmt.Println(libro,partes,lis)
+
+	var logRecord string
 	archi, err := os.OpenFile("log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
         log.Fatal(err)
@@ -116,11 +150,17 @@ func escribir(libro string, partes int, lis []string ){
 		aux = strconv.Itoa(ind)
 		//aux2 = strconv.Itoa(val)
 		aux2 = val
+		logRecord = logRecord + libro + "_" + aux+ "&&&"+aux2 + "%%%"
 		aux = libro+"_"+aux + " " +aux2
+
         _,_ = datawriter.WriteString(aux+"\n")
     }
     datawriter.Flush()
 	archi.Close()
+
+	logRecord = logRecord[0:len(logRecord)-3]
+
+	return logRecord
 }
 
 
@@ -129,9 +169,17 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 	return &Message{Body: "Hello From the Server!"}, nil
 }
 
+func (s *Server) RequestLog(ctx context.Context, in *Message) (*Message, error) {
+	return &Message{Body:s.Log[in.Body]}, nil
+}
+
 func (s *Server) WriteLog(ctx context.Context, in *LogInfo) (*Message, error) {
 	log.Printf("Se desea escribir: %s", in.Log)
+
+	var logRecord string
+
 	prop := strings.Split(in.Log,"%%%")
+
 	if s.Mode == 0{
 		//Logica centralizada
 		s.mux.Lock()
@@ -143,7 +191,7 @@ func (s *Server) WriteLog(ctx context.Context, in *LogInfo) (*Message, error) {
 			if s.State == 0{
 				flag = 1
 				s.State = 1
-				escribir(in.Nombre,int(in.Partes),prop)
+				logRecord = escribir(in.Nombre,int(in.Partes),prop)
 			} else{
 				time.Sleep(time.Duration(5) * time.Second)
 			}
@@ -157,14 +205,15 @@ func (s *Server) WriteLog(ctx context.Context, in *LogInfo) (*Message, error) {
 
 	} else {
 		//Logica distribuida
-		escribir(in.Nombre,int(in.Partes),prop)
+		logRecord = escribir(in.Nombre,int(in.Partes),prop)
 
 	}
 
+	s.Log[in.Nombre] = logRecord
 	
 
 
-	return &Message{Body: "Recurso Liberado"}, nil
+	return &Message{Body: "Log actualizado"}, nil
 }
 
 func (s *Server) DistributeChunk(ctx context.Context, in *Chunk) (*Message, error) {
@@ -265,6 +314,7 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 
 	} else{
 		//logica distribuida
+		prop_c = in.Body
 
 	}
 	
@@ -374,6 +424,173 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 	} else {
 		//logica distribuida
+
+		
+
+
+		m1 := true
+		m2 := true
+		m3 := true
+		ej1 := mensaje{nombre : "N/A", largo_chunks :len(chunkList) }
+
+
+		//crear propuesta
+		var prop_c string
+		var prob int
+		s1 := rand.NewSource(time.Now().UnixNano())
+		r1 := rand.New(s1)
+		
+		var aux string
+
+		if len(chunkList)>=3{
+			prop_c = prop_c + "1%%%"
+			prop_c = prop_c + "2%%%"
+			prop_c = prop_c + "3%%%"
+			for i:=4; i<= len(chunkList); i++{
+				prob = r1.Intn(3) +1
+				aux = strconv.Itoa(prob)
+				prop_c = prop_c + aux + "%%%"
+			}
+		} else if len(chunkList) == 2{
+			prop_c = prop_c + "1%%%"
+			prop_c = prop_c + "2%%%"
+		}else{
+			prop_c = prop_c + "1%%%"
+		}
+	
+		prop_c = prop_c[0:len(prop_c)-3]
+
+		if s.Id == "1"{
+
+
+		
+			//DataNode 2
+			var conn *grpc.ClientConn
+			conn, err := grpc.Dial(":9002", grpc.WithInsecure())
+			if err != nil {
+				log.Fatalf("did not connect: %s", err)
+			}
+
+			
+
+			c := NewChatServiceClient(conn)
+
+			_, err1 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
+			if err1 != nil {
+				m2 = false
+			}
+
+			conn.Close()
+
+			//DataNode 3
+			conn3, err3 := grpc.Dial(":9003", grpc.WithInsecure())
+			if err3 != nil {
+				log.Fatalf("did not connect: %s", err)
+			}
+
+			c = NewChatServiceClient(conn)
+			_, err33 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
+			if err33 != nil {
+				m3 = false
+			}
+			conn3.Close()
+
+
+		}
+
+		if s.Id == "2"{
+		//DataNode 1
+		var conn *grpc.ClientConn
+		conn, err := grpc.Dial(":9000", grpc.WithInsecure())
+		if err != nil {
+			log.Fatalf("did not connect: %s", err)
+		}
+
+		c := NewChatServiceClient(conn)
+
+		_, err1 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
+		if err1 != nil {
+			m1 = false
+		}
+		
+		conn.Close()
+		
+		//DataNode 3
+		conn3, err3 := grpc.Dial(":9003", grpc.WithInsecure())
+		if err3 != nil {
+			log.Fatalf("did not connect: %s", err)
+		}
+
+		c = NewChatServiceClient(conn)
+		_, err33 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
+		if err33 != nil {
+			m3 = false
+		}
+		conn3.Close()
+
+		} else {
+		//DataNode 1
+		var conn *grpc.ClientConn
+		conn, err := grpc.Dial(":9000", grpc.WithInsecure())
+		if err != nil {
+			log.Fatalf("did not connect: %s", err)
+		}
+
+		c := NewChatServiceClient(conn)
+
+		_, err1 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
+		if err1 != nil {
+			m1 = false
+		}
+		
+		conn.Close()
+		
+		//DataNode 2
+		conn2, err2 := grpc.Dial(":9002", grpc.WithInsecure())
+		if err2 != nil {
+			log.Fatalf("did not connect: %s", err)
+		}
+
+		c = NewChatServiceClient(conn)
+		_, err22 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
+		if err22 != nil {
+			m2 = false
+		}
+	
+		conn2.Close()
+
+		}
+
+		if (m1 && m2 && m3 ) == false{
+			prop_c = createRegPropDist(ej1,m1,m2,m3)
+		}
+		prop_c = createRegPropDist(ej1,m1,m2,m3)
+
+		distribution = prop_c
+
+		//conexion al NameNode
+		var conn *grpc.ClientConn
+		conn, error := grpc.Dial(":9001", grpc.WithInsecure())
+		if error != nil {
+			log.Fatalf("did not connect: %s", err)
+		}
+		defer conn.Close()
+
+		c := NewChatServiceClient(conn)
+
+		//Escribir en el log
+
+
+		//Algoritmo Ricart y agrawala
+
+
+		response, err2 := c.WriteLog(context.Background(), &LogInfo{Log: distribution, Nombre: libro,
+			Partes: int64(cantidadMensajes)})
+			if err2 != nil {
+				log.Fatalf("Error when calling SayHello: %s", err2)
+			}
+			log.Printf("Respuesta NameNode %s", response.Body)
+
 	}
 	
 	
@@ -527,7 +744,7 @@ func (s *Server) LibrosDis(ctx context.Context, in *Message) (*Message, error) {
 func (s *Server) RequestChunk(ctx context.Context, in *Message) (*Chunk, error) {
 	log.Printf("Receive message body from client: %s", in.Body)
 	//read a chunk
-	currentChunkFileName := in.Body
+	currentChunkFileName := "./DB/" + in.Body
 	newFileChunk, err := os.Open(currentChunkFileName)
 
 	if err != nil {
