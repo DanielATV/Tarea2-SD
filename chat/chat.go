@@ -257,38 +257,38 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 		//checkear conexiones
 
 	
-		var conn *grpc.ClientConn
-		var conn2 *grpc.ClientConn
-		var conn3 *grpc.ClientConn
+		//var conn *grpc.ClientConn
+		//var conn2 *grpc.ClientConn
+		//var conn3 *grpc.ClientConn
 		//DataNode 1
 		
-		conn, err := grpc.Dial(":9000", grpc.WithInsecure(),grpc.WithBlock(),
+		_, err := grpc.Dial(":9000", grpc.WithInsecure(),grpc.WithBlock(),
 		grpc.WithTimeout(10*time.Second),)
 		if err != nil {
 			fmt.Println("Fallo conexion al DataNode 1")
 			m1  = false
 		}
-		defer conn.Close()
+		//defer conn.Close()
 		
 		//DataNode 2
-		conn2, err2 := grpc.Dial(":9002", grpc.WithInsecure(),grpc.WithBlock(),
+		_, err2 := grpc.Dial(":9002", grpc.WithInsecure(),grpc.WithBlock(),
 		grpc.WithTimeout(10*time.Second),)
 		if err2 != nil {
 			fmt.Println("Fallo conexion al DataNode 2")
 			m2  = false
 		}
 	
-		defer conn2.Close()
+		//defer conn2.Close()
 
 		//DataNode 3
-		conn3, err3 := grpc.Dial(":9003", grpc.WithInsecure(),grpc.WithBlock(),
+		_, err3 := grpc.Dial(":9003", grpc.WithInsecure(),grpc.WithBlock(),
 		grpc.WithTimeout(10*time.Second),)
 		if err3 != nil {
 			fmt.Println("Fallo conexion al DataNode 3")
 			m3  = false
 		}
 		
-		defer conn3.Close()
+		//defer conn3.Close()
 
 
 		ej1 := mensaje{nombre : "N/A", largo_chunks :len(sep) }
@@ -398,6 +398,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 		response, err1 := c.SendPropuesta(context.Background(), &Message{Body: prop_c,
 		Id: s.Id})
 		if err1 != nil {
+			fmt.Println("Murio antes del log")
 			log.Fatalf("Error when calling SayHello: %s", err1)
 		}
 		log.Printf("Propuesta Recibida %s", response.Body)
@@ -408,6 +409,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 		response, err2 := c.WriteLog(context.Background(), &LogInfo{Log: distribution, Nombre: libro,
 		Partes: int64(cantidadMensajes)})
 		if err2 != nil {
+			fmt.Println("Murio en el log")
 			log.Fatalf("Error when calling SayHello: %s", err2)
 		}
 		log.Printf("Propuesta Recibida %s", response.Body)
