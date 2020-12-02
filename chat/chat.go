@@ -31,6 +31,25 @@ type mensaje struct{
 	largo_chunks int
 }
 
+func ProbPropuesta() bool{
+	s1 := rand.NewSource(time.Now().UnixNano())
+    r1 := rand.New(s1)
+
+
+	prob := r1.Intn(100)
+
+	//Porobabilidad de falla
+	if prob <= 50{
+		return false
+		//Respuesta
+	}else
+	{
+
+		return true
+	}
+
+}
+
 func checkConn(node string, prop string) string {
 
 	var conn *grpc.ClientConn
@@ -330,7 +349,17 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 
 	} else{
 		//logica distribuida
-		prop_c = "OK"
+
+		//Ve si la rechaza o acepta
+		
+		
+		outcome := ProbPropuesta()
+
+		if outcome == true {
+			prop_c = "OK"
+		} else {
+			prop_c = "NO"
+		}
 
 	}
 	

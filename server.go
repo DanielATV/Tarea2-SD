@@ -22,7 +22,7 @@ func main() {
 
 	fmt.Println("Servidor Arriba")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9001))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9003))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
