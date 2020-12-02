@@ -236,6 +236,7 @@ func (s *Server) WriteLog(ctx context.Context, in *LogInfo) (*Message, error) {
 				flag = 1
 				s.State = 1
 				logRecord = escribir(in.Nombre,int(in.Partes),prop)
+				log.Println("Escribi en el log")
 			} else{
 				time.Sleep(time.Duration(5) * time.Second)
 			}
@@ -250,6 +251,7 @@ func (s *Server) WriteLog(ctx context.Context, in *LogInfo) (*Message, error) {
 	} else {
 		//Logica distribuida
 		logRecord = escribir(in.Nombre,int(in.Partes),prop)
+		log.Println("Escribi en el log")
 
 	}
 
