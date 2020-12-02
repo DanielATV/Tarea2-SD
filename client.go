@@ -38,6 +38,7 @@ func main() {
 	fmt.Scanln(&clientType)
 
 
+
 	// ClientUploader
 	if clientType == 0{
 
@@ -101,9 +102,11 @@ func main() {
 
 		totalPartsNum := uint64(math.Ceil(float64(fileSize) / float64(fileChunk)))
 
-		fmt.Printf("Splitting to %d pieces.\n", totalPartsNum)
+		//fmt.Printf("Splitting to %d pieces.\n", totalPartsNum)
 
 		stream, _ := c.SendChunk(context.Background())
+
+		log.Printf("Tiempo de inicio")
 
 
 		// Envio de chunks
@@ -117,14 +120,16 @@ func main() {
 				chunkList = append(chunkList,partBuffer)
 
 				stream.Send(&chat.Chunk{Chunk: partBuffer, Nombre: choiceHolder, Total: int64(totalPartsNum),
-			Indice: int64(i)})
+				Indice: int64(i)})
+
+				log.Println("Mensaje Enviado")
 		}
 
 		response, err := stream.CloseAndRecv()
 		if err != nil {
-			log.Fatalf("Error when calling SayHello: %s", err)
+			log.Fatalf("Error when calling SendChunk: %s", err)
 		}
-		log.Printf("Respuesta del DataNode: %s", response.Body)
+		//log.Printf("Respuesta del DataNode: %s", response.Body)
 
 
 	// ClientDownloader

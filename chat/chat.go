@@ -213,11 +213,12 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 }
 
 func (s *Server) RequestLog(ctx context.Context, in *Message) (*Message, error) {
+	log.Println("Mensaje Enviado")
 	return &Message{Body:s.Log[in.Body]}, nil
 }
 
 func (s *Server) WriteLog(ctx context.Context, in *LogInfo) (*Message, error) {
-	log.Printf("Se desea escribir: %s", in.Log)
+	//log.Printf("Se desea escribir: %s", in.Log)
 
 	var logRecord string
 
@@ -256,12 +257,12 @@ func (s *Server) WriteLog(ctx context.Context, in *LogInfo) (*Message, error) {
 	s.Log[in.Nombre] = logRecord
 	
 
-
+	log.Println("Mensaje Enviado")
 	return &Message{Body: "Log actualizado"}, nil
 }
 
 func (s *Server) DistributeChunk(ctx context.Context, in *Chunk) (*Message, error) {
-	log.Printf("Recibido el fragmentro del libro: %s", in.Nombre)
+	//log.Printf("Recibido el fragmentro del libro: %s", in.Nombre)
 	// write to disk
 	fileName := "./DB/"+in.Nombre+"_" + strconv.FormatUint(uint64(in.Indice), 10)
 	_, err := os.Create(fileName)
@@ -274,17 +275,18 @@ func (s *Server) DistributeChunk(ctx context.Context, in *Chunk) (*Message, erro
 	// write/save buffer to disk
 	ioutil.WriteFile(fileName, in.Chunk, os.ModeAppend)
 
-	fmt.Println("Split to : ", fileName)
-
+	//fmt.Println("Split to : ", fileName)
+	log.Println("Mensaje Enviado")
 	return &Message{Body: "Chunk recibido"}, nil
 }
 
 func (s *Server) CheckStatus(ctx context.Context, in *Message) (*Message, error) {
-	log.Printf("Chequeando estado del Nodo: %s", in.Body)
+	//log.Printf("Chequeando estado del Nodo: %s", in.Body)
+	log.Println("Mensaje Enviado")
 	return &Message{Body: "ACK"}, nil
 }
 func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, error) {
-	log.Printf("Propuesta recibida: %s", in.Body)
+	//log.Printf("Propuesta recibida: %s", in.Body)
 	var prop_c string
 
 	if s.Mode == 0{
@@ -364,7 +366,7 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 	}
 	
 	//guardar en el log (otro metodo)
-	
+	log.Println("Mensaje Enviado")
 	return &Message{Body: prop_c}, nil
 }
 
@@ -382,7 +384,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 		//fmt.Println("Llego chunk")
 		if err == io.EOF {
-			log.Printf("LLego el libro %s", libro)
+			//log.Printf("LLego el libro %s", libro)
 			break
 		}
 		if err != nil {
@@ -406,8 +408,6 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 	}
 
 	//fmt.Println(len(chunkList))
-
-	fmt.Println("Envio propuesta")
 
 	//Envia propuesta
 
@@ -452,25 +452,26 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 	
 		prop_c = prop_c[0:len(prop_c)-3]
 
-
+		log.Println("Mensaje Enviado")
 		response, err1 := c.SendPropuesta(context.Background(), &Message{Body: prop_c,
 		Id: s.Id})
 		if err1 != nil {
-			fmt.Println("Murio antes del log")
-			log.Fatalf("Error when calling SayHello: %s", err1)
+			//fmt.Println("Murio antes del log")
+			log.Fatalf("Error when calling SendPropuesta: %s", err1)
 		}
 		log.Printf("Propuesta Recibida %s", response.Body)
 
 		distribution = response.Body
 
 		//Escribir en el log
+		log.Println("Mensaje Enviado")
 		response, err2 := c.WriteLog(context.Background(), &LogInfo{Log: distribution, Nombre: libro,
 		Partes: int64(cantidadMensajes)})
 		if err2 != nil {
-			fmt.Println("Murio en el log")
+			//fmt.Println("Murio en el log")
 			log.Fatalf("Error when calling Writelog: %s", err2)
 		}
-		log.Printf("Propuesta Recibida %s", response.Body)
+		//log.Printf("Propuesta Recibida %s", response.Body)
 
 
 	} else {
@@ -519,6 +520,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			if s.Id == "1"{
 
 				//DataNode 2
+				log.Println("Mensaje Enviado")
 				holdResponse = checkConn(":9002", prop_c)
 
 				if holdResponse == "ERROR"{
@@ -531,6 +533,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 				}
 
 				//DataNode 3
+				log.Println("Mensaje Enviado")
 				holdResponse = checkConn(":9003", prop_c)
 
 				if holdResponse == "ERROR"{
@@ -546,7 +549,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 			} else if s.Id == "2"{
 				//DataNode 1
-			
+				log.Println("Mensaje Enviado")
 				holdResponse = checkConn(":9000", prop_c)
 
 				if holdResponse == "ERROR"{
@@ -559,6 +562,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 				}
 				
 				//DataNode 3
+				log.Println("Mensaje Enviado")
 				holdResponse = checkConn(":9003", prop_c)
 
 				if holdResponse == "ERROR"{
@@ -573,6 +577,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			} else {
 
 				//DataNode 1
+				log.Println("Mensaje Enviado")
 				holdResponse = checkConn(":9000", prop_c)
 
 				if holdResponse == "ERROR"{
@@ -586,6 +591,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			
 			
 				//DataNode 2
+				log.Println("Mensaje Enviado")
 				holdResponse = checkConn(":9002", prop_c)
 
 				if holdResponse == "ERROR"{
@@ -621,13 +627,13 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 		//Escribir en el log
 
-
-		response, err2 := c.WriteLog(context.Background(), &LogInfo{Log: distribution, Nombre: libro,
+		log.Println("Mensaje Enviado")
+		_, err2 := c.WriteLog(context.Background(), &LogInfo{Log: distribution, Nombre: libro,
 			Partes: int64(cantidadMensajes)})
 			if err2 != nil {
 				log.Fatalf("Error when calling WriteLog: %s", err2)
 			}
-			log.Printf("Respuesta NameNode %s", response.Body)
+			//log.Printf("Respuesta NameNode %s", response.Body)
 
 	}
 	
@@ -682,6 +688,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 				c := NewChatServiceClient(conn)
 
 				//Envio del Chunk
+				log.Println("Mensaje Enviado")
 				filler, err := c.DistributeChunk(context.Background(), &Chunk{Chunk: chunkList[i],
 					Nombre: libro,
 					Indice: int64(i)})
@@ -707,6 +714,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 				c := NewChatServiceClient(conn)
 
 				//Envio del Chunk
+				log.Println("Mensaje Enviado")
 				filler, err := c.DistributeChunk(context.Background(), &Chunk{Chunk: chunkList[i],
 					Nombre: libro,
 					Indice: int64(i)})
@@ -721,6 +729,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 			if sep[cont] == "3"{
 				//conexion al NameNode3
+				
 				var conn *grpc.ClientConn
 				conn, error := grpc.Dial(":9003", grpc.WithInsecure())
 				if error != nil {
@@ -730,6 +739,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 				c := NewChatServiceClient(conn)
 
 				//Envio del Chunk
+				log.Println("Mensaje Enviado")
 				filler, err := c.DistributeChunk(context.Background(), &Chunk{Chunk: chunkList[i],
 					Nombre: libro,
 					Indice: int64(i)})
@@ -776,11 +786,12 @@ func (s *Server) LibrosDis(ctx context.Context, in *Message) (*Message, error) {
 		}
 
 	}
+	log.Println("Mensaje Enviado")
 	return &Message{Body: actual}, nil
 }
 
 func (s *Server) RequestChunk(ctx context.Context, in *Message) (*Chunk, error) {
-	log.Printf("Receive message body from client: %s", in.Body)
+	//log.Printf("Receive message body from client: %s", in.Body)
 	//read a chunk
 	currentChunkFileName := "./DB/" + in.Body
 	newFileChunk, err := os.Open(currentChunkFileName)
@@ -812,6 +823,6 @@ func (s *Server) RequestChunk(ctx context.Context, in *Message) (*Chunk, error) 
 			fmt.Println(err)
 			os.Exit(1)
 	}
-
+	log.Println("Mensaje Enviado")
 	return &Chunk{Chunk: chunkBufferBytes}, nil
 }
