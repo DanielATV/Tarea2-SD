@@ -257,52 +257,43 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 		//checkear conexiones
 
 	
-
-		//DataNode 1
 		var conn *grpc.ClientConn
-		conn, err := grpc.Dial(":9000", grpc.WithInsecure())
-		if err != nil {
-			log.Fatalf("did not connect: %s", err)
-		}
-
-		c := NewChatServiceClient(conn)
-
-		_, err1 := c.SayHello(context.Background(), &Message{Body: "Hello From Client!"})
-		if err1 != nil {
-			m1 = false
-		}
+		var conn2 *grpc.ClientConn
+		var conn3 *grpc.ClientConn
+		//DataNode 1
 		
-		conn.Close()
+		conn, err := grpc.Dial(":9000", grpc.WithInsecure(),grpc.WithBlock(),
+		grpc.WithTimeout(10*time.Second),)
+		if err != nil {
+			fmt.Println("Fallo conexion al DataNode 1")
+			m1  = false
+		}
+		defer conn.Close()
 		
 		//DataNode 2
-		conn2, err2 := grpc.Dial(":9002", grpc.WithInsecure())
+		conn2, err2 := grpc.Dial(":9002", grpc.WithInsecure(),grpc.WithBlock(),
+		grpc.WithTimeout(10*time.Second),)
 		if err2 != nil {
-			log.Fatalf("did not connect: %s", err)
-		}
-
-		c = NewChatServiceClient(conn)
-		_, err22 := c.SayHello(context.Background(), &Message{Body: "Hello From Client!"})
-		if err22 != nil {
-			m2 = false
+			fmt.Println("Fallo conexion al DataNode 2")
+			m2  = false
 		}
 	
-		conn2.Close()
+		defer conn2.Close()
 
 		//DataNode 3
-		conn3, err3 := grpc.Dial(":9003", grpc.WithInsecure())
+		conn3, err3 := grpc.Dial(":9003", grpc.WithInsecure(),grpc.WithBlock(),
+		grpc.WithTimeout(10*time.Second),)
 		if err3 != nil {
-			log.Fatalf("did not connect: %s", err)
+			fmt.Println("Fallo conexion al DataNode 3")
+			m3  = false
 		}
-
-		c = NewChatServiceClient(conn)
-		_, err33 := c.SayHello(context.Background(), &Message{Body: "Hello From Client!"})
-		if err33 != nil {
-			m3 = false
-		}
-		conn3.Close()
+		
+		defer conn3.Close()
 
 
 		ej1 := mensaje{nombre : "N/A", largo_chunks :len(sep) }
+
+		fmt.Println(m1,m2,m3)
 
 		//checkear propuesta
 		if (m1 && m2 && m3){
@@ -424,8 +415,6 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 	} else {
 		//logica distribuida
-
-		
 
 
 		m1 := true
@@ -597,6 +586,8 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 	//Distribuir los chunks
 
+	
+
 	var sep []string
 	cont:= 0
 	//fmt.Println(len(chunkList))
@@ -630,6 +621,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			
 
 		} else {
+
 			if sep[cont] == "1"{
 
 				//conexion al NameNode1
@@ -638,7 +630,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 				if error != nil {
 					log.Fatalf("did not connect: %s", err)
 				}
-				conn.Close()
+				
 
 				c := NewChatServiceClient(conn)
 
@@ -663,7 +655,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 				if error != nil {
 					log.Fatalf("did not connect: %s", err)
 				}
-				conn.Close()
+	
 
 				c := NewChatServiceClient(conn)
 
@@ -687,7 +679,6 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 				if error != nil {
 					log.Fatalf("did not connect: %s", err)
 				}
-				conn.Close()
 
 				c := NewChatServiceClient(conn)
 
