@@ -12,14 +12,22 @@ import (
 
 func main() {
 
-	fmt.Println("Go gRPC Beginners Tutorial!")
+	var serverType int
+	//Solicitar tipo de algortimo
+	fmt.Println("Indique el tipo de algoritmo")
+	fmt.Println("0: Centralizado")
+	fmt.Println("1: Distriuido")
+	
+	fmt.Scanln(&serverType)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9000))
+	fmt.Println("Servidor Arriba")
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9001))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := chat.Server{Log:make(map[string]string), Mode:0, Id: "1", State: 0}
+	s := chat.Server{Log:make(map[string]string), Mode: serverType, Id: "1", State: 0}
 
 	grpcServer := grpc.NewServer()
 

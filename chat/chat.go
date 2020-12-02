@@ -31,6 +31,30 @@ type mensaje struct{
 	largo_chunks int
 }
 
+func checkConn(node string, prop string) string {
+
+	var conn *grpc.ClientConn
+	conn, err := grpc.Dial(node, grpc.WithInsecure(),grpc.WithBlock(),
+	grpc.WithTimeout(10*time.Second),)
+	if err != nil {
+		return "ERROR"
+	}
+	defer conn.Close()
+
+	c := NewChatServiceClient(conn)
+
+	response, _ := c.SendPropuesta(context.Background(), &Message{Body: prop})
+	
+	if response.Body == "OK"{
+		return "OK"
+
+	} else {
+
+		return "NO"
+	}
+
+}
+
 func createRegPropDist (ej1 mensaje, m1 bool, m2 bool, m3 bool) string{ //Funcion que crea una propuesta dependiendo de sus restricciones
 	var prop_c string
 	var posibles []string
@@ -306,7 +330,7 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 
 	} else{
 		//logica distribuida
-		prop_c = in.Body
+		prop_c = "OK"
 
 	}
 	
@@ -422,8 +446,6 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 	} else {
 		//logica distribuida
-
-
 		m1 := true
 		m2 := true
 		m3 := true
@@ -456,106 +478,100 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 	
 		prop_c = prop_c[0:len(prop_c)-3]
 
-		if s.Id == "1"{
+		var contadorOK int
+
+		var holdResponse string
+
+		for contadorOK < 2{
+			contadorOK = 0
+
+			fmt.Println("Itero")
+
+			if s.Id == "1"{
+
+				//DataNode 2
+				holdResponse = checkConn(":9002", prop_c)
+
+				if holdResponse == "ERROR"{
+					m2 = false
+					contadorOK = contadorOK + 1
+				} else if holdResponse == "OK"{
+					contadorOK = contadorOK + 1
+				} else {
+					// Se rechazo
+				}
+
+				//DataNode 3
+				holdResponse = checkConn(":9003", prop_c)
+
+				if holdResponse == "ERROR"{
+					m3 = false
+					contadorOK = contadorOK + 1
+				} else if holdResponse == "OK"{
+					contadorOK = contadorOK + 1
+				} else {
+					// Se rechazo
+				}
 
 
-		
-			//DataNode 2
-			var conn *grpc.ClientConn
-			conn, err := grpc.Dial(":9002", grpc.WithInsecure())
-			if err != nil {
-				log.Fatalf("did not connect: %s", err)
-			}
 
+			} else if s.Id == "2"{
+				//DataNode 1
 			
+				holdResponse = checkConn(":9000", prop_c)
 
-			c := NewChatServiceClient(conn)
+				if holdResponse == "ERROR"{
+					m1 = false
+					contadorOK = contadorOK + 1
+				} else if holdResponse == "OK"{
+					contadorOK = contadorOK + 1
+				} else {
+					// Se rechazo
+				}
+				
+				//DataNode 3
+				holdResponse = checkConn(":9003", prop_c)
 
-			_, err1 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
-			if err1 != nil {
-				m2 = false
+				if holdResponse == "ERROR"{
+					m3 = false
+					contadorOK = contadorOK + 1
+				} else if holdResponse == "OK"{
+					contadorOK = contadorOK + 1
+				} else {
+					// Se rechazo
+				}
+
+			} else {
+
+				//DataNode 1
+				holdResponse = checkConn(":9000", prop_c)
+
+				if holdResponse == "ERROR"{
+					m1 = false
+					contadorOK = contadorOK + 1
+				} else if holdResponse == "OK"{
+					contadorOK = contadorOK + 1
+				} else {
+					// Se rechazo
+				}
+			
+			
+				//DataNode 2
+				holdResponse = checkConn(":9002", prop_c)
+
+				if holdResponse == "ERROR"{
+					m2 = false
+					contadorOK = contadorOK + 1
+				} else if holdResponse == "OK"{
+					contadorOK = contadorOK + 1
+				} else {
+					// Se rechazo
+				}
+
 			}
-
-			conn.Close()
-
-			//DataNode 3
-			conn3, err3 := grpc.Dial(":9003", grpc.WithInsecure())
-			if err3 != nil {
-				log.Fatalf("did not connect: %s", err)
-			}
-
-			c = NewChatServiceClient(conn)
-			_, err33 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
-			if err33 != nil {
-				m3 = false
-			}
-			conn3.Close()
-
-
 		}
 
-		if s.Id == "2"{
-		//DataNode 1
-		var conn *grpc.ClientConn
-		conn, err := grpc.Dial(":9000", grpc.WithInsecure())
-		if err != nil {
-			log.Fatalf("did not connect: %s", err)
-		}
-
-		c := NewChatServiceClient(conn)
-
-		_, err1 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
-		if err1 != nil {
-			m1 = false
-		}
 		
-		conn.Close()
-		
-		//DataNode 3
-		conn3, err3 := grpc.Dial(":9003", grpc.WithInsecure())
-		if err3 != nil {
-			log.Fatalf("did not connect: %s", err)
-		}
-
-		c = NewChatServiceClient(conn)
-		_, err33 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
-		if err33 != nil {
-			m3 = false
-		}
-		conn3.Close()
-
-		} else {
-		//DataNode 1
-		var conn *grpc.ClientConn
-		conn, err := grpc.Dial(":9000", grpc.WithInsecure())
-		if err != nil {
-			log.Fatalf("did not connect: %s", err)
-		}
-
-		c := NewChatServiceClient(conn)
-
-		_, err1 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
-		if err1 != nil {
-			m1 = false
-		}
-		
-		conn.Close()
-		
-		//DataNode 2
-		conn2, err2 := grpc.Dial(":9002", grpc.WithInsecure())
-		if err2 != nil {
-			log.Fatalf("did not connect: %s", err)
-		}
-
-		c = NewChatServiceClient(conn)
-		_, err22 := c.SendPropuesta(context.Background(), &Message{Body: prop_c})
-		if err22 != nil {
-			m2 = false
-		}
-	
-		conn2.Close()
-
-		}
 
 		if (m1 && m2 && m3 ) == false{
 			prop_c = createRegPropDist(ej1,m1,m2,m3)
@@ -577,13 +593,10 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 		//Escribir en el log
 
 
-		//Algoritmo Ricart y agrawala
-
-
 		response, err2 := c.WriteLog(context.Background(), &LogInfo{Log: distribution, Nombre: libro,
 			Partes: int64(cantidadMensajes)})
 			if err2 != nil {
-				log.Fatalf("Error when calling SayHello: %s", err2)
+				log.Fatalf("Error when calling WriteLog: %s", err2)
 			}
 			log.Printf("Respuesta NameNode %s", response.Body)
 
@@ -592,8 +605,6 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 	
 
 	//Distribuir los chunks
-
-	
 
 	var sep []string
 	cont:= 0

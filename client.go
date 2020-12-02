@@ -19,7 +19,6 @@ import (
 func main() {
 
 	var clientType int
-	clientType = 0
 
 	//Solicitar tipo de cliente
 	fmt.Println("Indique el tipo de cliente")
