@@ -209,6 +209,7 @@ func (s *Server) WriteLog(ctx context.Context, in *LogInfo) (*Message, error) {
 
 	}
 
+	s.Libros = append(s.Libros,in.Nombre)
 	s.Log[in.Nombre] = logRecord
 	
 
@@ -325,8 +326,10 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 	for {
 		//fmt.Println(len(chunkList))
 		buffer, err = stream.Recv()
+
+		//fmt.Println("Llego chunk")
 		if err == io.EOF {
-			log.Printf("LLego el libro %s", s.Libros[0])
+			log.Printf("LLego el libro %s", libro)
 			break
 		}
 		if err != nil {
@@ -335,7 +338,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 		if flag ==0 {
 			libro = buffer.Nombre
-			s.Libros = append(s.Libros,libro)
+			//s.Libros = append(s.Libros,libro)
 			flag = 1
 			chunkList = append(chunkList,buffer.Chunk)
 			cantidadMensajes = int(buffer.Total)
@@ -350,6 +353,8 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 	}
 
 	//fmt.Println(len(chunkList))
+
+	fmt.Println("Envio propuesta")
 
 	//Envia propuesta
 

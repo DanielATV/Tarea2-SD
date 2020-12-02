@@ -11,6 +11,8 @@ import (
 	"os"
 	"strings"
 
+	"time"
+
 	"github.com/tutorialedge/go-grpc-beginners-tutorial/chat"
 )
 
@@ -32,7 +34,8 @@ func main() {
 
 		//Conexion a DataNode
 		var conn *grpc.ClientConn
-		conn, err := grpc.Dial(":9000", grpc.WithInsecure())
+		conn, err := grpc.Dial(":9000", grpc.WithInsecure(),grpc.WithBlock(),
+		grpc.WithTimeout(10*time.Second),)
 		if err != nil {
 			log.Fatalf("did not connect: %s", err)
 		}
@@ -101,7 +104,8 @@ func main() {
 		//Conexion al NameNode
 		
 		var conn *grpc.ClientConn
-		conn, err := grpc.Dial(":9001", grpc.WithInsecure())
+		conn, err := grpc.Dial(":9001", grpc.WithInsecure(),grpc.WithBlock(),
+		grpc.WithTimeout(10*time.Second),)
 		if err != nil {
 			log.Fatalf("did not connect: %s", err)
 		}
@@ -114,7 +118,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error when calling SayHello: %s", err)
 		}
-		log.Printf("Response from server: %s", response.Body)
+		log.Printf("Lista de libros %s", response.Body)
 
 		var sep []string
 		sep = strings.Split(response.Body,"%%%")
@@ -128,9 +132,13 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error when calling SayHello: %s", err)
 		}
-		log.Printf("Response from server: %s", response.Body)
+		log.Printf("Ubicacion del archivo: %s", source.Body)
+
 
 		holder := strings.Split(source.Body,"%%%")
+
+
+
 		var bufferAux []string
 
 		newFileName := "libro.pdf"
@@ -155,21 +163,27 @@ func main() {
 		var hostname string
 
 		for _ , valor := range holder{
+
+			fmt.Println(valor)
+
 			bufferAux = strings.Split(valor,"&&&")
+
+			//fmt.Printf("%T\n", bufferAux[1])
 
 			if bufferAux[1] == "1"{
 				hostname = ":9000"
 
-			}
-
-			if bufferAux[1] == "2"{
+			} else if bufferAux[1] == "2"{
 				hostname = ":9002"
 
-			} else{
+			} else {
 				hostname = ":9003"
 
-				
 			}
+
+			//fmt.Println(hostname)
+
+
 
 			//Descarga del datanode
 			var conn *grpc.ClientConn
