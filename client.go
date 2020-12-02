@@ -10,11 +10,21 @@ import (
     "math"
 	"os"
 	"strings"
+	"math/rand"
 
 	"time"
 
 	"github.com/tutorialedge/go-grpc-beginners-tutorial/chat"
 )
+
+func NumeroPuerto()string{
+	s1 := rand.NewSource(time.Now().UnixNano())
+    r1 := rand.New(s1)
+    posibles := []string{":9000",":9002",":9003"}
+    puerto := posibles[r1.Intn(3)]
+    return puerto
+}
+
 
 func main() {
 
@@ -32,8 +42,10 @@ func main() {
 	if clientType == 0{
 
 		//Conexion a DataNode
+
+		randomChoice := NumeroPuerto()
 		var conn *grpc.ClientConn
-		conn, err := grpc.Dial(":9000", grpc.WithInsecure(),grpc.WithBlock(),
+		conn, err := grpc.Dial(randomChoice, grpc.WithInsecure(),grpc.WithBlock(),
 		grpc.WithTimeout(10*time.Second),)
 		if err != nil {
 			log.Fatalf("did not connect: %s", err)
@@ -44,8 +56,31 @@ func main() {
 
 		var chunkList [][]byte
 
+		//Seleccion de libro
+
+		fmt.Println("Selecione el libro que desea cargar")
+
+		catalogo := [3]string{"Dracula","Frankestein","Peter Pan"}
+
+		for ind, val := range catalogo {
+			fmt.Println(ind, val)
+	
+		}
+		var clientChoice int
+		var choiceHolder string
+		fmt.Scanln(&clientChoice)
+
+		if clientChoice == 1{
+			choiceHolder = "Dracula-Stoker_Bram.pdf"
+
+		} else if clientChoice ==2{
+			choiceHolder = "Frankenstein-Mary_Shelley.pdf"
+		} else {
+			choiceHolder = "Peter_Pan-J._M._Barrie.pdf"
+		}
+
 		//Particion del Libro
-		fileToBeChunked := "./libros/Dracula-Stoker_Bram.pdf" // change here!
+		fileToBeChunked := "./libros/" + choiceHolder // change here!
 
 		file, err := os.Open(fileToBeChunked)
 
@@ -81,7 +116,7 @@ func main() {
 
 				chunkList = append(chunkList,partBuffer)
 
-				stream.Send(&chat.Chunk{Chunk: partBuffer, Nombre: "Dracula-Stoker_Bram.pdf", Total: int64(totalPartsNum),
+				stream.Send(&chat.Chunk{Chunk: partBuffer, Nombre: choiceHolder, Total: int64(totalPartsNum),
 			Indice: int64(i)})
 		}
 
@@ -89,15 +124,13 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error when calling SayHello: %s", err)
 		}
-		log.Printf("Response from server: %s", response.Body)
+		log.Printf("Respuesta del DataNode: %s", response.Body)
 
 
 	// ClientDownloader
 	} else{
 
-		
-
-
+	
 		//Consulta Libros disponibles
 
 		//Conexion al NameNode
@@ -121,26 +154,35 @@ func main() {
 
 		var sep []string
 		sep = strings.Split(response.Body,"%%%")
+
+		var booksUploaded []string
 		for index, value := range sep {
 			fmt.Println(index, value)
+			booksUploaded = append(booksUploaded,value)
 	
 		}
 
+		//Elegir libro
+
+		var downloadChoice int
+		fmt.Scanln(&downloadChoice)
+
+
+
 		//Consulta el log
-		source, err := c.RequestLog(context.Background(), &chat.Message{Body: "Dracula-Stoker_Bram.pdf"})
+		source, err := c.RequestLog(context.Background(), &chat.Message{Body: booksUploaded[downloadChoice]})
 		if err != nil {
 			log.Fatalf("Error when calling SayHello: %s", err)
 		}
 		log.Printf("Ubicacion del archivo: %s", source.Body)
 
-
 		holder := strings.Split(source.Body,"%%%")
-
-
 
 		var bufferAux []string
 
-		newFileName := "libro.pdf"
+		//Reconstruir Libro
+
+		newFileName := booksUploaded[downloadChoice]
         _, err9 := os.Create(newFileName)
 
         if err9 != nil {
@@ -196,8 +238,10 @@ func main() {
 
 			responseChunk, err := cc.RequestChunk(context.Background(), &chat.Message{Body: bufferAux[0]})
 			if err != nil {
-				log.Fatalf("Error when calling SayHello: %s", err)
+				log.Fatalf("Error when calling RequestChunk: %s", err)
 			}
+
+			log.Printf("Se recibio el chunk")
 			
 			chunkBufferBytes := responseChunk.Chunk
 

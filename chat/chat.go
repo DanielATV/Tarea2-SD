@@ -39,7 +39,7 @@ func ProbPropuesta() bool{
 	prob := r1.Intn(100)
 
 	//Porobabilidad de falla
-	if prob <= 50{
+	if prob <= 25{
 		return false
 		//Respuesta
 	}else
@@ -468,7 +468,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 		Partes: int64(cantidadMensajes)})
 		if err2 != nil {
 			fmt.Println("Murio en el log")
-			log.Fatalf("Error when calling SayHello: %s", err2)
+			log.Fatalf("Error when calling Writelog: %s", err2)
 		}
 		log.Printf("Propuesta Recibida %s", response.Body)
 

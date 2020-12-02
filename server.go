@@ -13,6 +13,8 @@ import (
 func main() {
 
 	var serverType int
+	var nodeID string
+	var adress int
 	//Solicitar tipo de algortimo
 	fmt.Println("Indique el tipo de algoritmo")
 	fmt.Println("0: Centralizado")
@@ -20,14 +22,30 @@ func main() {
 	
 	fmt.Scanln(&serverType)
 
+	fmt.Println("Id del nodo")
+	
+	fmt.Scanln(&nodeID)
+
+	if nodeID == "1"{
+		adress =  9000
+	} else if nodeID == "2"{
+		adress = 9002
+	} else if nodeID == "3"{
+		adress = 9003
+	} else {
+		adress = 9001
+	}
+
 	fmt.Println("Servidor Arriba")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9003))
+	
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", adress))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := chat.Server{Log:make(map[string]string), Mode: serverType, Id: "1", State: 0}
+	s := chat.Server{Log:make(map[string]string), Mode: serverType, Id: nodeID, State: 0}
 
 	grpcServer := grpc.NewServer()
 
