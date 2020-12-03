@@ -14,7 +14,7 @@ func main() {
 
 	var serverType int
 	var nodeID string
-	var adress int
+	//var adress int
 	//Solicitar tipo de algortimo
 	fmt.Println("Indique el tipo de algoritmo")
 	fmt.Println("0: Centralizado")
@@ -26,6 +26,9 @@ func main() {
 	
 	fmt.Scanln(&nodeID)
 
+	/*
+
+	//Testeo Local
 	if nodeID == "1"{
 		adress =  9000
 	} else if nodeID == "2"{
@@ -36,11 +39,13 @@ func main() {
 		adress = 9001
 	}
 
+	*/
+
 	fmt.Println("Servidor Arriba")
 
 	
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", adress))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9000))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

@@ -20,7 +20,7 @@ import (
 func NumeroPuerto()string{
 	s1 := rand.NewSource(time.Now().UnixNano())
     r1 := rand.New(s1)
-    posibles := []string{":9000",":9002",":9003"}
+    posibles := []string{"dist01:9000","dist02:9000","dist03:9000"}
     puerto := posibles[r1.Intn(3)]
     return puerto
 }
@@ -43,7 +43,6 @@ func main() {
 	if clientType == 0{
 
 		//Conexion a DataNode
-
 		randomChoice := NumeroPuerto()
 		var conn *grpc.ClientConn
 		conn, err := grpc.Dial(randomChoice, grpc.WithInsecure(),grpc.WithBlock(),
@@ -71,10 +70,10 @@ func main() {
 		var choiceHolder string
 		fmt.Scanln(&clientChoice)
 
-		if clientChoice == 1{
+		if clientChoice == 0{
 			choiceHolder = "Dracula-Stoker_Bram.pdf"
 
-		} else if clientChoice ==2{
+		} else if clientChoice ==1{
 			choiceHolder = "Frankenstein-Mary_Shelley.pdf"
 		} else {
 			choiceHolder = "Peter_Pan-J._M._Barrie.pdf"
@@ -129,7 +128,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error when calling SendChunk: %s", err)
 		}
-		//log.Printf("Respuesta del DataNode: %s", response.Body)
+		log.Printf("Respuesta del DataNode: %s", response.Body)
 
 
 	// ClientDownloader
@@ -141,7 +140,7 @@ func main() {
 		//Conexion al NameNode
 		
 		var conn *grpc.ClientConn
-		conn, err := grpc.Dial(":9001", grpc.WithInsecure(),grpc.WithBlock(),
+		conn, err := grpc.Dial("dist04:9000", grpc.WithInsecure(),grpc.WithBlock(),
 		grpc.WithTimeout(10*time.Second),)
 		if err != nil {
 			log.Fatalf("did not connect: %s", err)
@@ -217,13 +216,13 @@ func main() {
 			//fmt.Printf("%T\n", bufferAux[1])
 
 			if bufferAux[1] == "1"{
-				hostname = ":9000"
+				hostname = "dist01:9000"
 
 			} else if bufferAux[1] == "2"{
-				hostname = ":9002"
+				hostname = "dist02:9000"
 
 			} else {
-				hostname = ":9003"
+				hostname = "dist03:9000"
 
 			}
 

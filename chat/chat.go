@@ -310,7 +310,7 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 		//var conn3 *grpc.ClientConn
 		//DataNode 1
 		
-		_, err := grpc.Dial(":9000", grpc.WithInsecure(),grpc.WithBlock(),
+		_, err := grpc.Dial("dist01:9000", grpc.WithInsecure(),grpc.WithBlock(),
 		grpc.WithTimeout(10*time.Second),)
 		if err != nil {
 			fmt.Println("Fallo conexion al DataNode 1")
@@ -319,7 +319,7 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 		//defer conn.Close()
 		
 		//DataNode 2
-		_, err2 := grpc.Dial(":9002", grpc.WithInsecure(),grpc.WithBlock(),
+		_, err2 := grpc.Dial("dist02:9000", grpc.WithInsecure(),grpc.WithBlock(),
 		grpc.WithTimeout(10*time.Second),)
 		if err2 != nil {
 			fmt.Println("Fallo conexion al DataNode 2")
@@ -329,7 +329,7 @@ func (s *Server) SendPropuesta(ctx context.Context, in *Message) (*Message, erro
 		//defer conn2.Close()
 
 		//DataNode 3
-		_, err3 := grpc.Dial(":9003", grpc.WithInsecure(),grpc.WithBlock(),
+		_, err3 := grpc.Dial("dist03:9000", grpc.WithInsecure(),grpc.WithBlock(),
 		grpc.WithTimeout(10*time.Second),)
 		if err3 != nil {
 			fmt.Println("Fallo conexion al DataNode 3")
@@ -420,7 +420,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 		//conexion al NameNode
 		var conn *grpc.ClientConn
-		conn, error := grpc.Dial(":9001", grpc.WithInsecure())
+		conn, error := grpc.Dial("dist04:9000", grpc.WithInsecure())
 		if error != nil {
 			log.Fatalf("did not connect: %s", err)
 		}
@@ -523,7 +523,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 				//DataNode 2
 				log.Println("Mensaje Enviado")
-				holdResponse = checkConn(":9002", prop_c)
+				holdResponse = checkConn("dist02:9000", prop_c)
 
 				if holdResponse == "ERROR"{
 					m2 = false
@@ -536,7 +536,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 				//DataNode 3
 				log.Println("Mensaje Enviado")
-				holdResponse = checkConn(":9003", prop_c)
+				holdResponse = checkConn("dist03:9000", prop_c)
 
 				if holdResponse == "ERROR"{
 					m3 = false
@@ -552,7 +552,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			} else if s.Id == "2"{
 				//DataNode 1
 				log.Println("Mensaje Enviado")
-				holdResponse = checkConn(":9000", prop_c)
+				holdResponse = checkConn("dist01:9000", prop_c)
 
 				if holdResponse == "ERROR"{
 					m1 = false
@@ -565,7 +565,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 				
 				//DataNode 3
 				log.Println("Mensaje Enviado")
-				holdResponse = checkConn(":9003", prop_c)
+				holdResponse = checkConn("dist03:9000", prop_c)
 
 				if holdResponse == "ERROR"{
 					m3 = false
@@ -580,7 +580,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 				//DataNode 1
 				log.Println("Mensaje Enviado")
-				holdResponse = checkConn(":9000", prop_c)
+				holdResponse = checkConn("dist01:9000", prop_c)
 
 				if holdResponse == "ERROR"{
 					m1 = false
@@ -594,7 +594,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			
 				//DataNode 2
 				log.Println("Mensaje Enviado")
-				holdResponse = checkConn(":9002", prop_c)
+				holdResponse = checkConn("dist02:9000", prop_c)
 
 				if holdResponse == "ERROR"{
 					m2 = false
@@ -619,7 +619,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 		//conexion al NameNode
 		var conn *grpc.ClientConn
-		conn, error := grpc.Dial(":9001", grpc.WithInsecure())
+		conn, error := grpc.Dial("dist04:9000", grpc.WithInsecure())
 		if error != nil {
 			log.Fatalf("did not connect: %s", err)
 		}
@@ -679,9 +679,9 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 
 			if sep[cont] == "1"{
 
-				//conexion al NameNode1
+				//conexion al DataNode1
 				var conn *grpc.ClientConn
-				conn, error := grpc.Dial(":9000", grpc.WithInsecure())
+				conn, error := grpc.Dial("dist01:9000", grpc.WithInsecure())
 				if error != nil {
 					log.Fatalf("did not connect: %s", err)
 				}
@@ -705,9 +705,9 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			}
 
 			if sep[cont] == "2"{
-				//conexion al NameNode2
+				//conexion al DataNode2
 				var conn *grpc.ClientConn
-				conn, error := grpc.Dial(":9002", grpc.WithInsecure())
+				conn, error := grpc.Dial("dist02:9000", grpc.WithInsecure())
 				if error != nil {
 					log.Fatalf("did not connect: %s", err)
 				}
@@ -730,10 +730,10 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 			}
 
 			if sep[cont] == "3"{
-				//conexion al NameNode3
+				//conexion al DataNode3
 				
 				var conn *grpc.ClientConn
-				conn, error := grpc.Dial(":9003", grpc.WithInsecure())
+				conn, error := grpc.Dial("dist03:9000", grpc.WithInsecure())
 				if error != nil {
 					log.Fatalf("did not connect: %s", err)
 				}
