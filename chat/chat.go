@@ -695,7 +695,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 					Nombre: libro,
 					Indice: int64(i)})
 				if err != nil {
-					log.Fatalf("Error when calling SayHello: %s", err)
+					log.Fatalf("Error when calling DistributeChunk: %s", err)
 				}
 
 				log.Printf(filler.Body)
@@ -721,7 +721,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 					Nombre: libro,
 					Indice: int64(i)})
 				if err != nil {
-					log.Fatalf("Error when calling SayHello: %s", err)
+					log.Fatalf("Error when calling DistributeChunk: %s", err)
 				}
 
 				log.Printf(filler.Body)
@@ -746,7 +746,7 @@ func (s *Server) SendChunk(stream ChatService_SendChunkServer) (err error) {
 					Nombre: libro,
 					Indice: int64(i)})
 				if err != nil {
-					log.Fatalf("Error when calling SayHello: %s", err)
+					log.Fatalf("Error when calling DistributeChunk: %s", err)
 				}
 
 				log.Printf(filler.Body)
