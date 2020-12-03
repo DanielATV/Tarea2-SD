@@ -168,6 +168,7 @@ func main() {
 
 		//Elegir libro
 
+		log.Printf("Indique el libro que desea")
 		var downloadChoice int
 		fmt.Scanln(&downloadChoice)
 

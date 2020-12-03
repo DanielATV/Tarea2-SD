@@ -31,13 +31,15 @@ El NameNode pregunta el modo en que debe ejecutarse y la Id que debe ser la que 
 
 El cliente tiene dos modos de funcionamiento, Uploader y Downloader. El Uploader solo puede subir una lista predetermianda de libros. Hace una conexion aleatorio a un DataNode al quere subir un libro, en el caso de fallar (si es que esta caido) se debe ejecutar de nuevo el comando make hasta que se conecte con uno que este activo.
 
+Para la elección del libro que se desea descargar (una vez que ha sido subido), se debe digitar el número al lado izquierdo del nombre.
+
 #### Consideraciones
 - El firewall debe estar desactivado en todas las maquinas virtuales
 - No se considero el caso que un nodo que mande una propuesta deje de funcionar o que ningun nodo funcione.
-- La estructura del log es nombre identificador. El identificador se mapea a la maquina correspondiente.
+- La estructura del log es nombre_del_chunk identificador. El identificador se mapea a la maquina correspondiente.
 - Solo se pueden cargar los libros que se muestran al cliente y estos deben de estar en la carpeta libros.
 - El NameNode no mantiene la lista de libros si cierra y se vuelve a ejecutar.
-- El el archivo log del NameNode se mantiene, pero por implentacion la ubicacion esta en memoria, por lo que se pierde al cerrar el nodo.
+- El el archivo log del NameNode se mantiene una vez se cierra el programa, pero por implentacion la ubicacion esta en memoria, por lo que se pierde al cerrar el nodo y no se puede consultar.
 -Todos los nodos deben estar en el mismo modo de ejecucion(algoritmo)
 
 
